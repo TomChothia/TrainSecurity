@@ -1,0 +1,6 @@
+Port 1: PIS (SWG: 192.168.2.24/24)
+Port 2: OBS (SWG: 192.168.1.24/24)
+Port 3: TCMS: PIS (DHCP)
+Port 4: TCMS: OBS (DHCP)
+Port 5:
+Port 6: Management (192.168.3.24/24)
