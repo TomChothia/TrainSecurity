@@ -13,6 +13,4 @@ TestBed: capture of spoofing the speed on the train test-bed
 
 Photos: pictures of spoofing the speed, the device and ETBN.
 
-JournalPaper.pdf: The draft of a journal paper that has been submitted to an engineering journal. This journal paper will appear after the conference paper, and cite the conference paper as previous work.
-
 MonitorRiskJustifications.pdf: A justification of the risks for the mointer train network. 
